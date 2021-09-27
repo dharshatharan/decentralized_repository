@@ -2,18 +2,31 @@
 ### Do not make changes to this file directly
 
 
+input AddImageInput {
+  description: String
+  title: String!
+  url: String!
+}
+
+"""Date custom scalar type"""
+scalar Date
+
 type Edges {
   cursor: String
   node: Image
 }
 
 type Image {
-  createdAt: String
+  createdAt: Date
   description: String
   id: Int
   title: String
-  updatedAt: String
+  updatedAt: Date
   url: String
+}
+
+type Mutation {
+  addImage(data: AddImageInput!): Image
 }
 
 type PageInfo {
