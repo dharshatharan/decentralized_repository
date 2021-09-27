@@ -1,0 +1,3 @@
+config:
+  gcp:project: tutorocean-test
+  pulumi:template: gcp-typescript
