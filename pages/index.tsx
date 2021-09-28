@@ -2,42 +2,69 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-import { gql, useQuery } from '@apollo/client';
+import { useIPFS } from '../hooks/UseIPFS';
+import { useState } from 'react';
 
-const AllImagesQuery = gql`
-  query AllImagesQuery($imagesFirst: Int, $imagesAfter: Int) {
-    images(first: $imagesFirst, after: $imagesAfter) {
-      pageInfo {
-        endCursor
-        hasNextPage
+const Home: NextPage = () => {
+  const ipfs = useIPFS();
+  const [images, setImages] = useState<string[]>([]);
+  const [imagesIPFS, setImagesIPFS] = useState<string[]>([]);
+
+
+  const uploadPhotoIPFS = async (file: File) => {
+    if (ipfs) {
+      const date = new Date()
+      const data = {
+        createdAt: date,
+        updatedAt: date,
+        title: "Test",
+        description: "Test Description",
       }
-      edges {
-        cursor
-        node {
-          id
-          createdAt
-          updatedAt
-          title
-          description
-          url
+
+      const dataResults = await ipfs.addAll(
+        [
+          { path: 'image', content: file },
+          { path: 'metadata.json', content: JSON.stringify(data) },
+        ],
+        { wrapWithDirectory: true }
+      )
+
+      for await (const result of dataResults) {
+        if (result.path === '') {
+          setImagesIPFS(oldImages => [
+            ...oldImages,
+            "https://ipfs.io/ipfs/" + result.cid + "/image"
+          ])
         }
       }
     }
-  }
-`
+  };
 
-const Home: NextPage = () => {
-  const { data, error, loading, fetchMore } = useQuery(AllImagesQuery, {
-    variables: { first: 2 },
-  });
+  const uploadPhoto = async (file: File) => {
+    const filename = encodeURIComponent(file.name);
+    const res = await fetch(`/api/upload-url?file=${filename}`);
+    const { url, fields } = await res.json();
+    const formData = new FormData();
 
-  if (loading) return <p>Loading......</p>;
+    Object.entries({ ...fields, file }).forEach(([key, value]) => {
+      // @ts-ignore
+      formData.append(key, value);
+    });
 
-  if (error) return <p>Oops, something went wrong {error.message}</p>;
+    const upload = await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
 
-  console.log(data)
-
-  const { hasNextPage, endCursor } = data.images.pageInfo;
+    if (upload.ok) {
+      setImages(oldImages => [
+        ...oldImages,
+        upload.url + filename
+      ])
+    } else {
+      console.error('Upload failed.');
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -48,55 +75,56 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <div className="container mx-auto max-w-5xl my-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {data?.images.edges.map(({ node }: any) => (
-              node.title
-            ))}
+        <input
+          onChange={(e: any) => {
+            const files = e.target.files;
+            for (var i = 0; i < files.length; i++) {
+              uploadPhoto(files[i]);
+              uploadPhotoIPFS(files[i]);
+            }
+          }}
+          type="file"
+          accept="image/png, image/jpeg"
+          className="fixed top-10 left-10"
+          multiple
+        />
+        <div className="flex flex-col text-center w-full prose lg:prose-xls max-w-screen-2xl">
+          <h1>Centralized vs Decentralized <br /> Image Repositories</h1>
+          <p>We&apos;re comparing two repository stratergies here. Centralized and Decentralized.</p>
+          <div className="w-full grid grid-cols-2 divide-x divide-gray-500 h-96">
+            <div className="w-full p-2">
+              <h2>Centralized</h2>
+              <div className="flex justify-center">
+                <div className="grid grid-flow-col auto-cols-max gap-10">
+                  {images.map((image) => {
+                    return (
+                      <div key={image} className="w-80 max-w-xs flex flex-col">
+                        <Image src={image} alt={image} width={300} height={300} objectFit="cover" />
+                        <a href="image" target="_blank" className="break-all">{image}</a>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+            <div className="w-full p-2">
+              <h2>Decentralized</h2>
+              <div className="flex justify-center">
+                <div className="grid grid-flow-col auto-cols-max gap-10">
+                  {imagesIPFS.map((image) => {
+                    return (
+                      <div key={image} className="w-80 max-w-xs flex flex-col">
+                        <Image src={image} alt={image} width={300} height={300} objectFit="cover" />
+                        <a href="image" target="_blank" className="break-all">{image}</a>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
-          {hasNextPage ? (
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded my-10"
-              onClick={() => {
-                fetchMore({
-                  variables: { after: endCursor },
-                  updateQuery: (prevResult: any, { fetchMoreResult }: any) => {
-                    fetchMoreResult.links.edges = [
-                      ...prevResult.links.edges,
-                      ...fetchMoreResult.links.edges,
-                    ];
-                    return fetchMoreResult;
-                  },
-                });
-              }}
-            >
-              more
-            </button>
-          ) : (
-            <p className="my-10 text-center font-medium">
-              Youve reached the end!
-            </p>
-          )}
         </div>
-
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <span className={styles.logo}>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   )
 }
