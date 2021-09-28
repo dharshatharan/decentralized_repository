@@ -91,9 +91,13 @@ const Home: NextPage = () => {
         <div className="flex flex-col text-center w-full prose lg:prose-xls max-w-screen-2xl">
           <h1>Centralized vs Decentralized <br /> Image Repositories</h1>
           <p>We&apos;re comparing two repository stratergies here. Centralized and Decentralized.</p>
+          <p>To test, upload multiple images using the &rsquo;Choose Files&rsquo; button on the top left and watch the images being uploaded and retrieved.
+            When you see the url, the image has been uploaded. And you see the image once it has been retrieved from the network.</p>
           <div className="w-full grid grid-cols-2 divide-x divide-gray-500 h-96">
             <div className="w-full p-2">
-              <h2>Centralized</h2>
+              <h2>Centralized
+                (<a href="https://cloud.google.com/storage/" rel="noreferrer" target="_blank">Google Cloud Storage</a>)
+              </h2>
               <div className="flex justify-center">
                 <div className="grid grid-flow-col auto-cols-max gap-10">
                   {images.map((image) => {
@@ -108,7 +112,9 @@ const Home: NextPage = () => {
               </div>
             </div>
             <div className="w-full p-2">
-              <h2>Decentralized</h2>
+              <h2>Decentralized (
+                <a href="https://ipfs.io/" rel="noreferrer" target="_blank">IPFS - Interplanetary File System</a>)
+              </h2>
               <div className="flex justify-center">
                 <div className="grid grid-flow-col auto-cols-max gap-10">
                   {imagesIPFS.map((image) => {
