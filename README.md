@@ -1,34 +1,20 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Centralized vs Decentralized Image Repositories
 
-## Getting Started
+This application was initial created as a submission for the [Shopify Developer Intern Challenge](https://docs.google.com/document/d/1eg3sJTOwtyFhDopKedRD6142CFkDfWp1QvRKXNTPIOc/edit)
 
-First, run the development server:
+In this application we compare two types of storage solutions side by side.
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+**Centralized Storage:** Using proven technologies like [Google Cloud Storage](https://cloud.google.com/storage/) and [MySQL](https://www.mysql.com/) ([PlantScale](https://planetscale.com/))  
+**Decentralized Storage:** Using a [Interplanetary File System (IPFS)](https://ipfs.io/)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Demo - https://decentralized-repository.vercel.app/
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+# Learnings
+* **IPFS is much faster at uploading** the image (since it is hosted in the same machine it is uploaded from), but not as efficient at retrieving it if the image is not available by neighbouring peers. Google Cloud Storage on the other hand is much more efficient at retrieving the image, but slower at uploading it as it uploads to a remote server. Although this characteristic of IPFS can be very effective at scale.
+* **IPFS's uses the system cache to host the images**, this means that the images might not be available if not referenced by other peers. This can be fixed by a concept called [pinning](https://docs.ipfs.io/concepts/persistence/#pinning-in-context).
+* **IPFS is a distributed system**, this means that the images are not stored on the same machine unlike Google Cloud Storage where there is only one source of truth.
+* **IPFS can store metadata in the same directory** as the image, this means that the metadata can be retrieved by other peers easily and a seperate database isn't required.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+# Improvements to be made
+* Use the existing [PlantScale Database](https://planetscale.com/) ([here](https://github.com/dharshatharan/decentralized_repository/blob/main/prisma/schema.prisma)) and [GrapQL API](https://graphql.org/) ([here](https://github.com/dharshatharan/decentralized_repository/blob/main/pages/api/graphql.ts)) to store the metadata for the Centralized System
+* Store accurate metadata for the Decentralized System (currently using hardcoded values)
