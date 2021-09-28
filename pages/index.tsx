@@ -100,7 +100,7 @@ const Home: NextPage = () => {
                     return (
                       <div key={image} className="w-80 max-w-xs flex flex-col">
                         <Image src={image} alt={image} width={300} height={300} objectFit="cover" />
-                        <a href="image" target="_blank" className="break-all">{image}</a>
+                        <a href={image} rel="noreferrer" target="_blank" className="break-all">{image}</a>
                       </div>
                     )
                   })}
@@ -115,7 +115,7 @@ const Home: NextPage = () => {
                     return (
                       <div key={image} className="w-80 max-w-xs flex flex-col">
                         <Image src={image} alt={image} width={300} height={300} objectFit="cover" />
-                        <a href="image" target="_blank" className="break-all">{image}</a>
+                        <a href={image} rel="noreferrer" target="_blank" className="break-all">{image}</a>
                       </div>
                     )
                   })}
